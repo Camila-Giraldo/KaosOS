@@ -2,6 +2,7 @@
 from datetime import datetime
 import customtkinter as ck
 import os
+import subprocess
 from PIL import Image, ImageTk
 from data import principal_access as access
 
@@ -121,6 +122,26 @@ class Login:
         Function to shutting down the OS
         """
         self.root.destroy()
+        
+class Programs:
+    def calculator(self):
+        route = os.path.join(programs_path, 'calculator.py')
+        subprocess.Popen(["python", route])
+    
+    def calendar(self):
+        route = os.path.join(programs_path, 'calendar.py')
+        subprocess.Popen(["python", route])
+    
+    def explorer(self):
+        route = os.path.join(programs_path, 'explorer.py')
+        subprocess.Popen(["python", route])
+    
+    def text_editor(self):
+        route = os.path.join(programs_path, 'text_editor.py')
+        subprocess.Popen(["python", route])
+        
+
+programs = Programs()
 
 
 class Desktop:
@@ -142,37 +163,28 @@ class Desktop:
         self.buttons_frame = ck.CTkFrame(self.root, corner_radius = 1)
         self.buttons_frame.configure(bg_color = "#000000")
         self.buttons_frame.pack(side = "bottom")
-
-        img_pwr = ck.CTkImage(
-            light_image=Image.open(os.path.join(images_path, "power-button.png")),
-            dark_image=Image.open(os.path.join(images_path, "power-button.png")),
-            size=(20, 20),
-        )
-
-        ck.CTkButton(
-            self.buttons_frame,
-            image=img_pwr,
-            text="",
-            fg_color="transparent",
-            hover=False,
-            command=self.shutting_down,
-        ).pack(side="left", anchor="sw")
         
-        img_home = ck.CTkImage(
-            light_image = Image.open(os.path.join(images_path, "menu.png")),
-            dark_image = Image.open(os.path.join(images_path, "menu.png")),
-            size=(20,20)
-        )
+        self.icons = [
+            (Image.open((os.path.join(images_path, 'power-button.png'))).resize((35, 35)), lambda: self.shutting_down()),
+            (Image.open((os.path.join(images_path, 'calculator.png'))).resize((35, 35)), lambda: programs.calculator()),
+            (Image.open((os.path.join(images_path, 'calendar.png'))).resize((35, 35)), lambda: programs.calendar()),
+            (Image.open((os.path.join(images_path, 'text_editor.png'))).resize((35, 35)), lambda: programs.text_editor()),
+            (Image.open((os.path.join(images_path, 'explorer.png'))).resize((35, 35)), lambda: programs.explorer()),
+        ]
         
-        button_home = ck.CTkButton(
-            master = self.buttons_frame,
-            image = img_home,
-            text = "",
-            fg_color = "transparent",
-            command = self.home   
-        )
+        images_tk = [ImageTk.PhotoImage(image) for image, _ in self.icons]
         
-        button_home.pack(anchor="s", padx=5, pady=5)
+        for i, (images_tk, action) in enumerate(zip(images_tk, (action for _, action in self.icons))):
+            button = ck.CTkButton(
+                master = self.buttons_frame,
+                image = images_tk,
+                text = "",
+                command = action,
+                fg_color = 'white',
+                hover_color='gray'
+            )
+            button.configure(width = images_tk.width(), height = images_tk.height())
+            button.pack(side = 'left', padx = 5, pady = 5) 
         
         self.frame_clock = ck.CTkFrame(self.root, width=100, height=100, bg_color="black", corner_radius=2)
         self.frame_clock.pack(side="top", anchor="n", padx = 0, pady= 0)
@@ -187,14 +199,14 @@ class Desktop:
         self.clock_label.configure(text=actual_time)
         self.root.after(1000, self.time_update)
         self.root.mainloop()
-        
+    
+    def home(self):
+        print("Clicking on Home")
+    
     def shutting_down(self):
         """
         Function to shutting down the OS
         """
         self.root.destroy()
-    
-    def home(self):
-        print("Clicking on Home")
 
 Login()
