@@ -200,9 +200,6 @@ class Desktop:
         self.root.after(1000, self.time_update)
         self.root.mainloop()
     
-    def home(self):
-        print("Clicking on Home")
-    
     def shutting_down(self):
         """
         Function to shutting down the OS
