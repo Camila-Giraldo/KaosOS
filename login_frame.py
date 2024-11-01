@@ -6,6 +6,8 @@ from hashlib import sha256
 
 images_path = os.path.join(os.path.dirname(__file__), "images")
 users_file = os.path.join(os.path.dirname(__file__), "users.json")
+users_path = os.path.join(os.path.dirname(__file__), "Users")
+
 
 class LoginFrame(ck.CTkFrame):
     def __init__(self, master, switch_frame_callback):
@@ -39,10 +41,12 @@ class LoginFrame(ck.CTkFrame):
         # Buttons
         ck.CTkButton(self, text="Sign in", command=self.validate_login).pack(pady=10)
         ck.CTkButton(self, text="Register", command=self.register_user).pack(pady=5)
-        
+
         ck.CTkButton(
             self,
-            image=ck.CTkImage(Image.open(os.path.join(images_path, "power-button.png")), size=(30, 30)),
+            image=ck.CTkImage(
+                Image.open(os.path.join(images_path, "power-button.png")), size=(30, 30)
+            ),
             text="",
             fg_color="transparent",
             hover=False,
@@ -52,8 +56,14 @@ class LoginFrame(ck.CTkFrame):
     def create_entry(self, placeholder, is_password=False):
         entry = ck.CTkEntry(self, show="*" if is_password else "")
         entry.insert(0, placeholder)
-        entry.bind("<FocusIn>", lambda e: entry.delete(0, "end") if entry.get() == placeholder else None)
-        entry.bind("<FocusOut>", lambda e: entry.insert(0, placeholder) if not entry.get() else None)
+        entry.bind(
+            "<FocusIn>",
+            lambda e: entry.delete(0, "end") if entry.get() == placeholder else None,
+        )
+        entry.bind(
+            "<FocusOut>",
+            lambda e: entry.insert(0, placeholder) if not entry.get() else None,
+        )
         return entry
 
     def hash_password(self, password):
@@ -82,7 +92,11 @@ class LoginFrame(ck.CTkFrame):
             ck.CTkLabel(self, text="Login successful", text_color="green").pack()
             self.switch_frame_callback("desktop")
         else:
-            ck.CTkLabel(self, text="User or password incorrect", text_color="red").pack()
+            ck.CTkLabel(
+                self, text="User or password incorrect", text_color="red"
+            ).pack()
+
+        return username
 
     def register_user(self):
         """Register a new user and save it to JSON file."""
@@ -95,4 +109,23 @@ class LoginFrame(ck.CTkFrame):
         else:
             users[username] = password
             self.save_users(users)
-            ck.CTkLabel(self, text="User registered successfully", text_color="green").pack()
+            path = os.path.join(users_path, username)
+            os.makedirs(path, exist_ok=True)
+            self.create_principal_folders(path)
+            ck.CTkLabel(
+                self, text="User registered successfully", text_color="green"
+            ).pack()
+
+    def create_principal_folders(self, path):
+        base_folders = [
+            "Descargas",
+            "Documentos",
+            "Música",
+            "Imágenes",
+            "Escritorio",
+            "Videos",
+        ]
+
+        for folder in base_folders:
+            route = os.path.join(path, folder)
+            os.makedirs(route, exist_ok=True)
